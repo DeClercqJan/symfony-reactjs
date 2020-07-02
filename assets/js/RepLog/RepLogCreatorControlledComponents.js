@@ -6,11 +6,10 @@ export default class RepLogCreator extends Component {
         super(props);
 
         this.state = {
+            selectedItemId: '',
+            quantityValue: 0,
             quantityInputError: ''
         };
-
-        this.quantityInput = React.createRef();
-        this.itemSelect = React.createRef();
 
         this.itemOptions = [
             { id: 'cat', text: 'Cat' },
@@ -20,16 +19,20 @@ export default class RepLogCreator extends Component {
         ];
 
         this.handleFormSubmit = this.handleFormSubmit.bind(this);
+        this.handleSelectedItemChange = this.handleSelectedItemChange.bind(this);
+        this.handleQuantityInputChange = this.handleQuantityInputChange.bind(this);
     }
 
     handleFormSubmit(event) {
         event.preventDefault();
         const { onAddRepLog } = this.props;
+        const { selectedItemId, quantityValue } = this.state;
 
-        const quantityInput = this.quantityInput.current;
-        const itemSelect = this.itemSelect.current;
+        const itemLabel = this.itemOptions.find((option) => {
+            return option.id === this.state.selectedItemId
+        }).text;
 
-        if (quantityInput.value <= 0) {
+        if (quantityValue <= 0) {
             this.setState({
                 quantityInputError: 'Please enter a value greater than 0'
             });
@@ -39,19 +42,32 @@ export default class RepLogCreator extends Component {
         }
 
         onAddRepLog(
-            itemSelect.options[itemSelect.selectedIndex].text,
-            quantityInput.value
+            itemLabel,
+            quantityValue
         );
 
-        quantityInput.value = '';
-        itemSelect.selectedIndex = 0;
         this.setState({
+            selectedItemId: '',
+            quantityValue: 0,
             quantityInputError: ''
         });
     }
 
+    handleSelectedItemChange(event) {
+        this.setState({
+            selectedItemId: event.target.value
+        });
+    }
+
+    handleQuantityInputChange(event) {
+        this.setState({
+            quantityValue: event.target.value
+        });
+    }
+
     render() {
-        const { quantityInputError } = this.state;
+        const { quantityInputError, selectedItemId, quantityValue } = this.state;
+
         return (
             <form onSubmit={this.handleFormSubmit}>
             <div className="form-group">
@@ -60,7 +76,8 @@ export default class RepLogCreator extends Component {
             What did you lift?
     </label>
         <select id="rep_log_item"
-        ref={this.itemSelect}
+        value={selectedItemId}
+        onChange={this.handleSelectedItemChange}
         required="required"
         className="form-control">
             <option value="">What did you
@@ -78,7 +95,8 @@ export default class RepLogCreator extends Component {
             How many times?
     </label>
         <input type="number" id="rep_log_reps"
-        ref={this.quantityInput}
+        value={quantityValue}
+        onChange={this.handleQuantityInputChange}
         required="required"
         placeholder="How many times?"
         className="form-control"/>
